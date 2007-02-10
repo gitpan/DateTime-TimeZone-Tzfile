@@ -1,0 +1,31 @@
+NAME
+
+DateTime::TimeZone::Tzfile - tzfile (zoneinfo) timezone files
+
+DESCRIPTION
+
+An instance of this class represents a timezone that was encoded in a
+file in the tzfile(5) format.  These can express arbitrary patterns of
+offsets from Universal Time, changing over time.  Offsets and change
+times are limited to a resolution of one second.
+
+This class implements the DateTime::TimeZone interface, so that its
+instances can be used with DateTime objects.
+
+INSTALLATION
+
+	perl Makefile.PL
+	make
+	make test
+	make install
+
+AUTHOR
+
+Andrew Main (Zefram) <zefram@fysh.org>
+
+COPYRIGHT
+
+Copyright (C) 2007 Andrew Main (Zefram) <zefram@fysh.org>
+
+This module is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.

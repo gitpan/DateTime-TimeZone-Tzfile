@@ -1,0 +1,13 @@
+# http://module-build.sourceforge.net/META-spec.html
+#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
+name:         DateTime-TimeZone-Tzfile
+version:      0.000
+version_from: lib/DateTime/TimeZone/Tzfile.pm
+installdirs:  site
+requires:
+    DateTime::TimeZone::SystemV:   0.000
+    IO::File:                      1.03
+    IO::Handle:                    1.08
+
+distribution_type: module
+generated_by: ExtUtils::MakeMaker version 6.17
