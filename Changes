@@ -1,3 +1,24 @@
+version 0.001; 2007-09-12
+
+  * bugfix: override any ambient $SIG{__DIE__} handler when using eval { }
+
+  * bugfix: require bugfixed version of DateTime::TimeZone::SystemV
+    (for $SIG{__DIE__} handling)
+
+  * new key/value constructor parameter style
+
+  * constructor option to set timezone name independently from filename
+
+  * constructor option to supply an open filehandle
+
+  * use "fields" module to structure object
+
+  * build with Module::Build instead of ExtUtils::MakeMaker
+
+  * complete dependency list
+
+  * include signature in distribution
+
 version 0.000; 2007-02-10
 
   * initial released version

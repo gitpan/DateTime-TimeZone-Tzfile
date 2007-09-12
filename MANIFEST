@@ -1,11 +1,14 @@
 .cvsignore
+Build.PL
 Changes
 MANIFEST
 META.yml
 Makefile.PL
 README
 lib/DateTime/TimeZone/Tzfile.pm
+t/construct.t
 t/ident.t
 t/local.t
 t/london.tz
 t/offset.t
+SIGNATURE    Added here by Module::Build

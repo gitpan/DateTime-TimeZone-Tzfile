@@ -6,6 +6,9 @@ DateTime::TimeZone::Tzfile - tzfile (zoneinfo) timezone files
 
 	use DateTime::TimeZone::Tzfile;
 
+	$tz = DateTime::TimeZone::Tzfile->new(
+		name => "local timezone",
+		filename => "/etc/localtime");
 	$tz = DateTime::TimeZone::Tzfile->new("/etc/localtime");
 
 	if($tz->is_floating) { ...
@@ -41,7 +44,9 @@ use Carp qw(croak);
 use IO::File 1.03;
 use IO::Handle 1.08;
 
-our $VERSION = "0.000";
+our $VERSION = "0.001";
+
+use fields qw(name has_dst trn_times obs_types offsets);
 
 # fdiv(A, B), fmod(A, B): divide A by B, flooring remainder
 #
@@ -64,12 +69,41 @@ sub fmod($$) { $_[0] % $_[1] }
 
 =over
 
+=item DateTime::TimeZone::Tzfile->new(ATTR => VALUE, ...)
+
+Reads and parses a L<tzfile(5)> format file, then constructs and returns
+a L<DateTime>-compatible timezone object that implements the timezone
+encoded in the file.  The following attributes may be given:
+
+=over
+
+=item B<name>
+
+Name for the timezone object.  This will be returned by the C<name>
+method described below.
+
+=item B<filename>
+
+Name of the file from which to read the timezone data.  The filename
+must be understood by L<IO::File>.
+
+=item B<filehandle>
+
+An L<IO::Handle> object from which the timezone data can be read.
+This does not need to be a regular seekable file; it is read sequentially.
+After the constructor has finished, the handle can still be used to read
+any data that follows the timezone data.
+
+=back
+
+Either a filename or filename must be given.  If a timezone name is not
+given, then the filename is used instead if supplied; a timezone name
+must be given explicitly if no filename is given.
+
 =item DateTime::TimeZone::Tzfile->new(FILENAME)
 
-I<FILENAME> must be a filename that can be interpreted by L<IO::File>,
-and the file to which it refers must be in L<tzfile(5)> format.  Reads and
-parses the file, then constructs and returns a L<DateTime>-compatible
-timezone object that implements the timezone encoded in the file.
+Simpler way to invoke the above constructor in the usual case.  Only the
+filename is given; this will also be used as the timezone name.
 
 =cut
 
@@ -116,9 +150,38 @@ sub _read_tm64($) {
 }
 
 sub new($$) {
-	my($class, $filename) = @_;
-	my $fh = IO::File->new($filename, "r")
-		or croak "can't read $filename: $!";
+	my $class = shift;
+	unshift @_, "filename" if @_ == 1;
+	my DateTime::TimeZone::Tzfile $self = fields::new($class);
+	my($filename, $fh);
+	while(@_) {
+		my $attr = shift;
+		my $value = shift;
+		if($attr eq "name") {
+			croak "timezone name specified redundantly"
+				if exists $self->{name};
+			$self->{name} = $value;
+		} elsif($attr eq "filename") {
+			croak "filename specified redundantly"
+				if defined($filename) || defined($fh);
+			$filename = $value;
+		} elsif($attr eq "filehandle") {
+			croak "filehandle specified redundantly"
+				if defined($filename) || defined($fh);
+			$fh = $value;
+		} else {
+			croak "unrecognised attribute `$attr'";
+		}
+	}
+	croak "file not specified" unless defined($filename) || defined($fh);
+	unless(exists $self->{name}) {
+		croak "timezone name not specified" unless defined $filename;
+		$self->{name} = $filename;
+	}
+	if(defined $filename) {
+		$fh = IO::File->new($filename, "r")
+			or croak "can't read $filename: $!";
+	}
 	croak "bad tzfile: wrong magic number"
 		unless _saferead($fh, 4) eq "TZif";
 	my $fmtversion = _saferead($fh, 1);
@@ -170,7 +233,6 @@ sub new($$) {
 	}
 	my $first_std_type_index;
 	my %offsets;
-	my $has_dst;
 	for(my $i = 0; $i != $typecnt; $i++) {
 		my $abbrind = $types[$i]->[2];
 		croak "bad tzfile: invalid abbreviation index"
@@ -180,7 +242,7 @@ sub new($$) {
 		$types[$i]->[2] = $1;
 		$first_std_type_index = $i
 			if !defined($first_std_type_index) && !$types[$i]->[1];
-		$has_dst = 1 if $types[$i]->[1];
+		$self->{has_dst} = 1 if $types[$i]->[1];
 		if($types[$i]->[2] eq "zzz") {
 			# "zzz" means the zone is not defined at this time,
 			# due for example to the location being uninhabited
@@ -198,15 +260,13 @@ sub new($$) {
 	}
 	$obs_types[-1] = $late_rule eq "" ? undef : do {
 		require DateTime::TimeZone::SystemV;
+		DateTime::TimeZone::SystemV->VERSION("0.002");
 		DateTime::TimeZone::SystemV->new($late_rule);
 	};
-	return bless({
-		name => $filename,
-		has_dst => $has_dst,
-		trn_times => \@trn_times,
-		obs_types => \@obs_types,
-		offsets => [ sort { $a <=> $b } keys %offsets ],
-	}, $class);
+	$self->{trn_times} = \@trn_times;
+	$self->{obs_types} = \@obs_types;
+	$self->{offsets} = [ sort { $a <=> $b } keys %offsets ];
+	return $self;
 }
 
 =back
@@ -259,11 +319,16 @@ sub category($) { undef }
 
 =item $tz->name
 
-Returns the I<FILENAME> that was supplied to the constructor.
+Returns the timezone name.  Usually this is the filename that was supplied
+to the constructor, but it can be overridden by the constructor's B<name>
+attribute.
 
 =cut
 
-sub name($) { $_[0]->{name} }
+sub name($) {
+	my DateTime::TimeZone::Tzfile $self = shift;
+	return $self->{name};
+}
 
 =back
 
@@ -279,14 +344,18 @@ affect any of the zone's behaviour.
 
 =cut
 
-sub has_dst_changes($) { $_[0]->{has_dst} }
+sub has_dst_changes($) {
+	my DateTime::TimeZone::Tzfile $self = shift;
+	return $self->{has_dst};
+}
 
 #
 # observance lookup
 #
 
 sub _type_for_rdn_sod($$$) {
-	my($self, $utc_rdn, $utc_sod) = @_;
+	my DateTime::TimeZone::Tzfile $self = shift;
+	my($utc_rdn, $utc_sod) = @_;
 	my $lo = 0;
 	my $hi = @{$self->{trn_times}};
 	while($lo != $hi) {
@@ -304,7 +373,8 @@ sub _type_for_rdn_sod($$$) {
 }
 
 sub _type_for_datetime($$) {
-	my($self, $dt) = @_;
+	my DateTime::TimeZone::Tzfile $self = shift;
+	my($dt) = @_;
 	my($utc_rdn, $utc_sod) = $dt->utc_rd_values;
 	$utc_sod = 86399 if $utc_sod >= 86400;
 	return $self->_type_for_rdn_sod($utc_rdn, $utc_sod);
@@ -319,7 +389,8 @@ is in effect at the instant represented by I<DT>, in seconds.
 =cut
 
 sub offset_for_datetime($$) {
-	my($self, $dt) = @_;
+	my DateTime::TimeZone::Tzfile $self = shift;
+	my($dt) = @_;
 	my $type = $self->_type_for_datetime($dt);
 	return ref($type) eq "ARRAY" ? $type->[0] :
 		$type->offset_for_datetime($dt);
@@ -336,7 +407,8 @@ affect anything else.
 =cut
 
 sub is_dst_for_datetime($$) {
-	my($self, $dt) = @_;
+	my DateTime::TimeZone::Tzfile $self = shift;
+	my($dt) = @_;
 	my $type = $self->_type_for_datetime($dt);
 	return ref($type) eq "ARRAY" ? $type->[1] :
 		$type->is_dst_for_datetime($dt);
@@ -353,7 +425,8 @@ either the timezone or the offset.
 =cut
 
 sub short_name_for_datetime($$) {
-	my($self, $dt) = @_;
+	my DateTime::TimeZone::Tzfile $self = shift;
+	my($dt) = @_;
 	my $type = $self->_type_for_datetime($dt);
 	return ref($type) eq "ARRAY" ? $type->[2] :
 		$type->short_name_for_datetime($dt);
@@ -391,17 +464,21 @@ sub _local_to_utc_rdn_sod($$$) {
 }
 
 sub offset_for_local_datetime($$) {
-	my($self, $dt) = @_;
+	my DateTime::TimeZone::Tzfile $self = shift;
+	my($dt) = @_;
 	my($lcl_rdn, $lcl_sod) = $dt->local_rd_values;
 	$lcl_sod = 86399 if $lcl_sod >= 86400;
 	foreach my $offset (@{$self->{offsets}}) {
 		my($utc_rdn, $utc_sod) =
 			_local_to_utc_rdn_sod($lcl_rdn, $lcl_sod, $offset);
-		my $ttype =
-			eval { $self->_type_for_rdn_sod($utc_rdn, $utc_sod) };
+		my $ttype = eval { local $SIG{__DIE__};
+			$self->_type_for_rdn_sod($utc_rdn, $utc_sod);
+		};
 		next unless defined $ttype;
 		my $local_offset = ref($ttype) eq "ARRAY" ? $ttype->[0] :
-			eval { $ttype->offset_for_local_datetime($dt) };
+			eval { local $SIG{__DIE__};
+				$ttype->offset_for_local_datetime($dt);
+			};
 		return $offset
 			if defined($local_offset) && $local_offset == $offset;
 	}
