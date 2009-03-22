@@ -1,3 +1,28 @@
+version 0.002; 2009-03-22
+
+  * with a version-1 tzfile, treat the last observance as continuing
+    indefinitely, rather than as having no rule for the future
+
+  * test POD syntax and coverage, and rename some internal functions to
+    satisfy the coverage test
+
+  * drop prototypes from method subs (where the prototypes have no effect)
+
+  * in tests, avoid unreliable "\d" regexp element
+
+  * typo fix in documentation
+
+  * really complete dependency list (was missing "integer", and
+    build_requires was missing "IO::File")
+
+  * include "distribution_type" entry in META.yml to satisfy CPANTS
+
+  * in documentation, separate "license" section from "copyright" section
+
+  * use full stricture in Build.PL
+
+  * remove from .cvsignore items that don't occur with Module::Build
+
 version 0.001; 2007-09-12
 
   * bugfix: override any ambient $SIG{__DIE__} handler when using eval { }

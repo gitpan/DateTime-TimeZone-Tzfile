@@ -44,15 +44,15 @@ use Carp qw(croak);
 use IO::File 1.03;
 use IO::Handle 1.08;
 
-our $VERSION = "0.001";
+our $VERSION = "0.002";
 
 use fields qw(name has_dst trn_times obs_types offsets);
 
-# fdiv(A, B), fmod(A, B): divide A by B, flooring remainder
+# _fdiv(A, B), _fmod(A, B): divide A by B, flooring remainder
 #
 # B must be a positive Perl integer.  A must be a Perl integer.
 
-sub fdiv($$) {
+sub _fdiv($$) {
 	my($a, $b) = @_;
 	if($a < 0) {
 		use integer;
@@ -63,7 +63,7 @@ sub fdiv($$) {
 	}
 }
 
-sub fmod($$) { $_[0] % $_[1] }
+sub _fmod($$) { $_[0] % $_[1] }
 
 =head1 CONSTRUCTOR
 
@@ -130,26 +130,26 @@ use constant UNIX_EPOCH_RDN => 719163;
 
 sub _read_tm32($) {
 	my $t = _read_s32($_[0]);
-	return [ UNIX_EPOCH_RDN + fdiv($t, 86400), fmod($t, 86400) ];
+	return [ UNIX_EPOCH_RDN + _fdiv($t, 86400), _fmod($t, 86400) ];
 }
 
 sub _read_tm64($) {
 	my($fh) = @_;
 	my $th = _read_s32($fh);
 	my $tl = _read_u32($fh);
-	my $dh = fdiv($th, 86400);
-	$th = (fmod($th, 86400) << 10) | ($tl >> 22);
-	my $d2 = fdiv($th, 86400);
-	$th = (fmod($th, 86400) << 10) | (($tl >> 12) & 0x3ff);
-	my $d3 = fdiv($th, 86400);
-	$th = (fmod($th, 86400) << 12) | ($tl & 0xfff);
-	my $d4 = fdiv($th, 86400);
-	$th = fmod($th, 86400);
+	my $dh = _fdiv($th, 86400);
+	$th = (_fmod($th, 86400) << 10) | ($tl >> 22);
+	my $d2 = _fdiv($th, 86400);
+	$th = (_fmod($th, 86400) << 10) | (($tl >> 12) & 0x3ff);
+	my $d3 = _fdiv($th, 86400);
+	$th = (_fmod($th, 86400) << 12) | ($tl & 0xfff);
+	my $d4 = _fdiv($th, 86400);
+	$th = _fmod($th, 86400);
 	my $d = $dh * 4294967296 + $d2 * 4194304 + (($d3 << 12) + $d4);
 	return [ UNIX_EPOCH_RDN + $d, $th ];
 }
 
-sub new($$) {
+sub new {
 	my $class = shift;
 	unshift @_, "filename" if @_ == 1;
 	my DateTime::TimeZone::Tzfile $self = fields::new($class);
@@ -198,7 +198,7 @@ sub new($$) {
 	for(my $i = $leapcnt; $i--; ) { _saferead($fh, 8); }
 	for(my $i = $ttisstdcnt; $i--; ) { _saferead($fh, 1); }
 	for(my $i = $ttisgmtcnt; $i--; ) { _saferead($fh, 1); }
-	my $late_rule = "";
+	my $late_rule;
 	if($fmtversion eq "2") {
 		croak "bad tzfile: wrong magic number"
 			unless _saferead($fh, 4) eq "TZif";
@@ -218,6 +218,7 @@ sub new($$) {
 		for(my $i = $ttisgmtcnt; $i--; ) { _saferead($fh, 1); }
 		croak "bad tzfile: missing newline"
 			unless _saferead($fh, 1) eq "\x0a";
+		$late_rule = "";
 		while(1) {
 			my $c = _saferead($fh, 1);
 			last if $c eq "\x0a";
@@ -258,11 +259,13 @@ sub new($$) {
 			if $obs_type >= $typecnt;
 		$obs_type = $types[$obs_type];
 	}
-	$obs_types[-1] = $late_rule eq "" ? undef : do {
-		require DateTime::TimeZone::SystemV;
-		DateTime::TimeZone::SystemV->VERSION("0.002");
-		DateTime::TimeZone::SystemV->new($late_rule);
-	};
+	if(defined $late_rule) {
+		$obs_types[-1] = $late_rule eq "" ? undef : do {
+			require DateTime::TimeZone::SystemV;
+			DateTime::TimeZone::SystemV->VERSION("0.002");
+			DateTime::TimeZone::SystemV->new($late_rule);
+		};
+	}
 	$self->{trn_times} = \@trn_times;
 	$self->{obs_types} = \@obs_types;
 	$self->{offsets} = [ sort { $a <=> $b } keys %offsets ];
@@ -287,7 +290,7 @@ Returns false.
 
 =cut
 
-sub is_floating($) { 0 }
+sub is_floating { 0 }
 
 =item $tz->is_utc
 
@@ -295,7 +298,7 @@ Returns false.
 
 =cut
 
-sub is_utc($) { 0 }
+sub is_utc { 0 }
 
 =item $tz->is_olson
 
@@ -307,7 +310,7 @@ in a future version.
 
 =cut
 
-sub is_olson($) { 0 }
+sub is_olson { 0 }
 
 =item $tz->category
 
@@ -315,7 +318,7 @@ Returns C<undef>, because the category can't be determined from the file.
 
 =cut
 
-sub category($) { undef }
+sub category { undef }
 
 =item $tz->name
 
@@ -325,7 +328,7 @@ attribute.
 
 =cut
 
-sub name($) {
+sub name {
 	my DateTime::TimeZone::Tzfile $self = shift;
 	return $self->{name};
 }
@@ -344,7 +347,7 @@ affect any of the zone's behaviour.
 
 =cut
 
-sub has_dst_changes($) {
+sub has_dst_changes {
 	my DateTime::TimeZone::Tzfile $self = shift;
 	return $self->{has_dst};
 }
@@ -353,7 +356,7 @@ sub has_dst_changes($) {
 # observance lookup
 #
 
-sub _type_for_rdn_sod($$$) {
+sub _type_for_rdn_sod {
 	my DateTime::TimeZone::Tzfile $self = shift;
 	my($utc_rdn, $utc_sod) = @_;
 	my $lo = 0;
@@ -372,7 +375,7 @@ sub _type_for_rdn_sod($$$) {
 	return $type;
 }
 
-sub _type_for_datetime($$) {
+sub _type_for_datetime {
 	my DateTime::TimeZone::Tzfile $self = shift;
 	my($dt) = @_;
 	my($utc_rdn, $utc_sod) = $dt->utc_rd_values;
@@ -388,7 +391,7 @@ is in effect at the instant represented by I<DT>, in seconds.
 
 =cut
 
-sub offset_for_datetime($$) {
+sub offset_for_datetime {
 	my DateTime::TimeZone::Tzfile $self = shift;
 	my($dt) = @_;
 	my $type = $self->_type_for_datetime($dt);
@@ -406,7 +409,7 @@ affect anything else.
 
 =cut
 
-sub is_dst_for_datetime($$) {
+sub is_dst_for_datetime {
 	my DateTime::TimeZone::Tzfile $self = shift;
 	my($dt) = @_;
 	my $type = $self->_type_for_datetime($dt);
@@ -424,7 +427,7 @@ either the timezone or the offset.
 
 =cut
 
-sub short_name_for_datetime($$) {
+sub short_name_for_datetime {
 	my DateTime::TimeZone::Tzfile $self = shift;
 	my($dt) = @_;
 	my $type = $self->_type_for_datetime($dt);
@@ -441,7 +444,7 @@ represents), and interprets that as a local time in the timezone of the
 timezone object (not the timezone used in I<DT>).  Returns the offset
 from UT that is in effect at that local time, in seconds.
 
-If the local time given is ambiguous due to a nearby offest change,
+If the local time given is ambiguous due to a nearby offset change,
 the numerically lowest offset (usually the standard one) is returned
 with no warning of the situation.  (Equivalently: the latest possible
 absolute time is indicated.)  If the local time given does not exist
@@ -463,7 +466,7 @@ sub _local_to_utc_rdn_sod($$$) {
 	return ($rdn, $sod);
 }
 
-sub offset_for_local_datetime($$) {
+sub offset_for_local_datetime {
 	my DateTime::TimeZone::Tzfile $self = shift;
 	my($dt) = @_;
 	my($lcl_rdn, $lcl_sod) = $dt->local_rd_values;
@@ -499,7 +502,9 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2007 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
