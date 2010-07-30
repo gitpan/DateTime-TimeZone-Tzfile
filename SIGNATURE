@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.55.
+signed via the Module::Signature module, version 0.64.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -14,25 +14,25 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 a14d497fa1655a30d79ea9309ebd2dfa407e59e9 .cvsignore
-SHA1 1979a9d86ba450a0be9a2de870735b05de96864c Build.PL
-SHA1 5b6eb89ee25065564588566f83e9e6d16f2cf51f Changes
+SHA1 268ae5b05dd69a9e1a80cde5666a87e3ad1458a4 .cvsignore
+SHA1 0af64c01210b4bb66fc198298098b58beccfde76 Build.PL
+SHA1 8954fb3097ed9e213d4664f8743a26fdd28163f1 Changes
 SHA1 da7bf3e6fb28ebe3cbaee538fc771462bf09d6c4 MANIFEST
-SHA1 6f7c5a29e67aca1a7b182749153b1c62a9b6f7d8 META.yml
-SHA1 f39315b8e83202006e8a916c6a58725d104f75ec Makefile.PL
-SHA1 270e64a2e377bf5becbb5264e5917422cf28c527 README
-SHA1 587d058d24c549b1245a720be3d05924a998d4fd lib/DateTime/TimeZone/Tzfile.pm
-SHA1 87dff2e8283c56056b33db8757506e2dd81b030c t/construct.t
-SHA1 42131e9abf845a825873aa352d89cc713bacf74c t/ident.t
-SHA1 6946fc24d8f2e49558636d793024aaf5b111449c t/local.t
+SHA1 24d1b621b6368d5bc3e4a617221accb10a769e13 META.yml
+SHA1 caae608231ffe78390c76451ade51a7cfc87a9f9 Makefile.PL
+SHA1 201a79c95caec19155b3364f9197c35c0a613585 README
+SHA1 7adbc2947a02035ddbd82b5d873bb408000d3ec9 lib/DateTime/TimeZone/Tzfile.pm
+SHA1 b37d2e89e157513b920145171dd64dae620efc47 t/construct.t
+SHA1 53c510140d6a9dacb4e94194273922f3b2ab4562 t/ident.t
+SHA1 9dfa2618535068060c90da60bb04ed24e750aacb t/local.t
 SHA1 e203aaf15eecc56c069b59f482f8ae3655c249a9 t/london.tz
-SHA1 5422a2e64e1f908ec929ffeb715d6924e55c3a82 t/offset.t
-SHA1 0e141eecf3ca4903ef38d9413b5403a9ddb0392f t/pod_cvg.t
-SHA1 74a957cd8b93f25672ecc6aa578a671d084dd343 t/pod_syn.t
+SHA1 3d0fb57dfec20242135862bcd3b93e5c10f5b8a4 t/offset.t
+SHA1 904d9a4f76525e2303e4b0c168c68230f223c8de t/pod_cvg.t
+SHA1 65c75abdef6f01a5d1588a307f2ddfe2333dc961 t/pod_syn.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.9 (GNU/Linux)
 
-iEYEARECAAYFAknGbdwACgkQOV9mt2VyAVH1AQCfcnewBm2DwSodDbuph2hKeFpc
-Y5cAn17ijR52rKkjBbedr2A0SaOBu/Nk
-=DvVu
+iEYEARECAAYFAkxTN8sACgkQOV9mt2VyAVH+MACgmrN60Yes3kydU2oKMJBuF/+r
+ZfIAnjunqCPaukHl/eRyvCAQijqi1ozQ
+=fHCm
 -----END PGP SIGNATURE-----

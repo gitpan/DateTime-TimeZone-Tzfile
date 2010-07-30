@@ -1,23 +1,7 @@
 ---
-name: DateTime-TimeZone-Tzfile
-version: 0.002
+abstract: 'tzfile (zoneinfo) timezone files'
 author:
   - 'Andrew Main (Zefram) <zefram@fysh.org>'
-abstract: tzfile (zoneinfo) timezone files
-license: perl
-resources:
-  license: ~
-requires:
-  Carp: 0
-  DateTime::TimeZone::SystemV: 0.002
-  IO::File: 1.03
-  IO::Handle: 1.08
-  constant: 0
-  fields: 0
-  integer: 0
-  perl: 5.006
-  strict: 0
-  warnings: 0
 build_requires:
   IO::File: 1.03
   Module::Build: 0
@@ -25,13 +9,33 @@ build_requires:
   perl: 5.006
   strict: 0
   warnings: 0
+configure_requires:
+  Module::Build: 0
+  perl: 5.006
+  strict: 0
+  warnings: 0
+distribution_type: module
 dynamic_config: 0
+generated_by: 'Module::Build version 0.3607'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: DateTime-TimeZone-Tzfile
 provides:
   DateTime::TimeZone::Tzfile:
     file: lib/DateTime/TimeZone/Tzfile.pm
-    version: 0.002
-generated_by: Module::Build version 0.31012
-meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
-distribution_type: module
+    version: 0.003
+requires:
+  Carp: 0
+  DateTime::TimeZone::SystemV: 0.002
+  IO::File: 1.03
+  IO::Handle: 1.08
+  constant: 0
+  integer: 0
+  perl: 5.006
+  strict: 0
+  warnings: 0
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.003

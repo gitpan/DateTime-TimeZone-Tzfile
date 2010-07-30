@@ -1,3 +1,22 @@
+version 0.003; 2010-07-30
+
+  * in documentation, correct one use of "filename" to "filehandle"
+
+  * in documentation, use the term "truth value" instead of the less
+    precise "boolean"
+
+  * abandon use of the "fields" module
+
+  * check for required Perl version at runtime
+
+  * use full stricture in test suite
+
+  * in Build.PL, explicitly declare configure-time requirements
+
+  * remove bogus "exit 0" from Build.PL
+
+  * add MYMETA.yml to .cvsignore
+
 version 0.002; 2009-03-22
 
   * with a version-1 tzfile, treat the last observance as continuing

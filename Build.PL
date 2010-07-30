@@ -1,3 +1,4 @@
+{ use 5.006; }
 use warnings;
 use strict;
 
@@ -6,6 +7,12 @@ use Module::Build;
 Module::Build->new(
 	module_name => "DateTime::TimeZone::Tzfile",
 	license => "perl",
+	configure_requires => {
+		"Module::Build" => 0,
+		"perl" => "5.006",
+		"strict" => 0,
+		"warnings" => 0,
+	},
 	build_requires => {
 		"IO::File" => "1.03",
 		"Module::Build" => 0,
@@ -20,7 +27,6 @@ Module::Build->new(
 		"IO::File" => "1.03",
 		"IO::Handle" => "1.08",
 		"constant" => 0,
-		"fields" => 0,
 		"integer" => 0,
 		"perl" => "5.006",
 		"strict" => 0,
@@ -32,4 +38,4 @@ Module::Build->new(
 	sign => 1,
 )->create_build_script;
 
-exit 0;
+1;

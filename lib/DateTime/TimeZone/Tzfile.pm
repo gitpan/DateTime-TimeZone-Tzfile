@@ -37,6 +37,7 @@ instances can be used with L<DateTime> objects.
 
 package DateTime::TimeZone::Tzfile;
 
+{ use 5.006; }
 use warnings;
 use strict;
 
@@ -44,9 +45,7 @@ use Carp qw(croak);
 use IO::File 1.03;
 use IO::Handle 1.08;
 
-our $VERSION = "0.002";
-
-use fields qw(name has_dst trn_times obs_types offsets);
+our $VERSION = "0.003";
 
 # _fdiv(A, B), _fmod(A, B): divide A by B, flooring remainder
 #
@@ -96,7 +95,7 @@ any data that follows the timezone data.
 
 =back
 
-Either a filename or filename must be given.  If a timezone name is not
+Either a filename or filehandle must be given.  If a timezone name is not
 given, then the filename is used instead if supplied; a timezone name
 must be given explicitly if no filename is given.
 
@@ -152,7 +151,7 @@ sub _read_tm64($) {
 sub new {
 	my $class = shift;
 	unshift @_, "filename" if @_ == 1;
-	my DateTime::TimeZone::Tzfile $self = fields::new($class);
+	my $self = bless({}, $class);
 	my($filename, $fh);
 	while(@_) {
 		my $attr = shift;
@@ -328,10 +327,7 @@ attribute.
 
 =cut
 
-sub name {
-	my DateTime::TimeZone::Tzfile $self = shift;
-	return $self->{name};
-}
+sub name { $_[0]->{name} }
 
 =back
 
@@ -341,24 +337,20 @@ sub name {
 
 =item $tz->has_dst_changes
 
-Returns a boolean indicating whether any of the observances in the file
+Returns a truth value indicating whether any of the observances in the file
 are marked as DST.  These DST flags are potentially arbitrary, and don't
 affect any of the zone's behaviour.
 
 =cut
 
-sub has_dst_changes {
-	my DateTime::TimeZone::Tzfile $self = shift;
-	return $self->{has_dst};
-}
+sub has_dst_changes { $_[0]->{has_dst} }
 
 #
 # observance lookup
 #
 
 sub _type_for_rdn_sod {
-	my DateTime::TimeZone::Tzfile $self = shift;
-	my($utc_rdn, $utc_sod) = @_;
+	my($self, $utc_rdn, $utc_sod) = @_;
 	my $lo = 0;
 	my $hi = @{$self->{trn_times}};
 	while($lo != $hi) {
@@ -376,8 +368,7 @@ sub _type_for_rdn_sod {
 }
 
 sub _type_for_datetime {
-	my DateTime::TimeZone::Tzfile $self = shift;
-	my($dt) = @_;
+	my($self, $dt) = @_;
 	my($utc_rdn, $utc_sod) = $dt->utc_rd_values;
 	$utc_sod = 86399 if $utc_sod >= 86400;
 	return $self->_type_for_rdn_sod($utc_rdn, $utc_sod);
@@ -392,8 +383,7 @@ is in effect at the instant represented by I<DT>, in seconds.
 =cut
 
 sub offset_for_datetime {
-	my DateTime::TimeZone::Tzfile $self = shift;
-	my($dt) = @_;
+	my($self, $dt) = @_;
 	my $type = $self->_type_for_datetime($dt);
 	return ref($type) eq "ARRAY" ? $type->[0] :
 		$type->offset_for_datetime($dt);
@@ -402,7 +392,7 @@ sub offset_for_datetime {
 =item $tz->is_dst_for_datetime(DT)
 
 I<DT> must be a L<DateTime>-compatible object (specifically, it must
-implement the C<utc_rd_values> method).  Returns a boolean indicating
+implement the C<utc_rd_values> method).  Returns a truth value indicating
 whether the timezone's observance at the instant represented by I<DT>
 is marked as DST.  This DST flag is potentially arbitrary, and doesn't
 affect anything else.
@@ -410,8 +400,7 @@ affect anything else.
 =cut
 
 sub is_dst_for_datetime {
-	my DateTime::TimeZone::Tzfile $self = shift;
-	my($dt) = @_;
+	my($self, $dt) = @_;
 	my $type = $self->_type_for_datetime($dt);
 	return ref($type) eq "ARRAY" ? $type->[1] :
 		$type->is_dst_for_datetime($dt);
@@ -428,8 +417,7 @@ either the timezone or the offset.
 =cut
 
 sub short_name_for_datetime {
-	my DateTime::TimeZone::Tzfile $self = shift;
-	my($dt) = @_;
+	my($self, $dt) = @_;
 	my $type = $self->_type_for_datetime($dt);
 	return ref($type) eq "ARRAY" ? $type->[2] :
 		$type->short_name_for_datetime($dt);
@@ -467,8 +455,7 @@ sub _local_to_utc_rdn_sod($$$) {
 }
 
 sub offset_for_local_datetime {
-	my DateTime::TimeZone::Tzfile $self = shift;
-	my($dt) = @_;
+	my($self, $dt) = @_;
 	my($lcl_rdn, $lcl_sod) = $dt->local_rd_values;
 	$lcl_sod = 86399 if $lcl_sod >= 86400;
 	foreach my $offset (@{$self->{offsets}}) {
@@ -502,7 +489,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2007, 2009 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2007, 2009, 2010 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

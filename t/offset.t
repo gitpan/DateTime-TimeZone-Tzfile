@@ -1,3 +1,6 @@
+use warnings;
+use strict;
+
 use Test::More;
 
 eval { require DateTime; };
@@ -5,6 +8,8 @@ plan skip_all => "DateTime not available" unless $@ eq "";
 plan tests => 1486;
 
 require_ok "DateTime::TimeZone::Tzfile";
+
+my $tz;
 
 sub try($$$$) {
 	my($timespec, $is_dst, $offset, $abbrev) = @_;
@@ -514,3 +519,5 @@ try "2039-03-27T00:59:59Z", 0,     +0, "GMT";
 try "2039-03-27T01:00:00Z", 1,  +3600, "BST";
 try "2039-10-30T00:59:59Z", 1,  +3600, "BST";
 try "2039-10-30T01:00:00Z", 0,     +0, "GMT";
+
+1;

@@ -1,7 +1,12 @@
+use warnings;
+use strict;
+
 use IO::File 1.03;
 use Test::More tests => 21;
 
 require_ok "DateTime::TimeZone::Tzfile";
+
+my $tz;
 
 sub new_fh() { IO::File->new("t/london.tz") or die $! }
 
@@ -23,7 +28,7 @@ $tz = DateTime::TimeZone::Tzfile->new(name => "foobar",
 ok $tz;
 is $tz->name, "foobar";
 
-$fh = new_fh();
+my $fh = new_fh();
 $tz = DateTime::TimeZone::Tzfile->new(name => "foobar", filehandle => $fh);
 ok $tz;
 is $tz->name, "foobar";
@@ -68,4 +73,4 @@ eval {
 };
 like $@, qr/\Afilehandle specified redundantly\b/;
 
-
+1;
