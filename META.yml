@@ -25,7 +25,7 @@ name: DateTime-TimeZone-Tzfile
 provides:
   DateTime::TimeZone::Tzfile:
     file: lib/DateTime/TimeZone/Tzfile.pm
-    version: 0.003
+    version: 0.004
 requires:
   Carp: 0
   DateTime::TimeZone::SystemV: 0.002
@@ -38,4 +38,4 @@ requires:
   warnings: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.003
+version: 0.004

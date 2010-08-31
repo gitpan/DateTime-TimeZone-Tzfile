@@ -45,7 +45,7 @@ use Carp qw(croak);
 use IO::File 1.03;
 use IO::Handle 1.08;
 
-our $VERSION = "0.003";
+our $VERSION = "0.004";
 
 # _fdiv(A, B), _fmod(A, B): divide A by B, flooring remainder
 #
@@ -80,6 +80,16 @@ encoded in the file.  The following attributes may be given:
 
 Name for the timezone object.  This will be returned by the C<name>
 method described below.
+
+=item B<category>
+
+The string or C<undef> that will be returned by the C<category> method
+described below.  Default C<undef>.
+
+=item B<is_olson>
+
+The truth value that will be returned by the C<is_olson> method described
+below.  Default false.
 
 =item B<filename>
 
@@ -148,6 +158,8 @@ sub _read_tm64($) {
 	return [ UNIX_EPOCH_RDN + $d, $th ];
 }
 
+use constant FACTORY_ABBR => "Local time zone must be set--see zic manual page";
+
 sub new {
 	my $class = shift;
 	unshift @_, "filename" if @_ == 1;
@@ -160,6 +172,14 @@ sub new {
 			croak "timezone name specified redundantly"
 				if exists $self->{name};
 			$self->{name} = $value;
+		} elsif($attr eq "category") {
+			croak "category value specified redundantly"
+				if exists $self->{category};
+			$self->{category} = $value;
+		} elsif($attr eq "is_olson") {
+			croak "is_olson flag specified redundantly"
+				if exists $self->{is_olson};
+			$self->{is_olson} = !!$value;
 		} elsif($attr eq "filename") {
 			croak "filename specified redundantly"
 				if defined($filename) || defined($fh);
@@ -176,6 +196,12 @@ sub new {
 	unless(exists $self->{name}) {
 		croak "timezone name not specified" unless defined $filename;
 		$self->{name} = $filename;
+	}
+	unless(exists $self->{category}) {
+		$self->{category} = undef;
+	}
+	unless(exists $self->{is_olson}) {
+		$self->{is_olson} = !!0;
 	}
 	if(defined $filename) {
 		$fh = IO::File->new($filename, "r")
@@ -243,7 +269,8 @@ sub new {
 		$first_std_type_index = $i
 			if !defined($first_std_type_index) && !$types[$i]->[1];
 		$self->{has_dst} = 1 if $types[$i]->[1];
-		if($types[$i]->[2] eq "zzz") {
+		if($types[$i]->[0] == 0 && !$types[$i]->[1] &&
+				$types[$i]->[2] eq "zzz") {
 			# "zzz" means the zone is not defined at this time,
 			# due for example to the location being uninhabited
 			$types[$i] = undef;
@@ -257,6 +284,18 @@ sub new {
 		croak "bad tzfile: invalid local time type index"
 			if $obs_type >= $typecnt;
 		$obs_type = $types[$obs_type];
+	}
+	if(defined($late_rule) && $late_rule eq "<".FACTORY_ABBR.">0" &&
+			defined($obs_types[-1]) && $obs_types[-1]->[0] == 0 &&
+			!$obs_types[-1]->[1] &&
+			$obs_types[-1]->[2] eq FACTORY_ABBR) {
+		# This bizarre timezone abbreviation is used in the Factory
+		# timezone in the Olson database.  It's not valid in a
+		# SysV-style TZ value, because it contains spaces, but zic
+		# puts it into one anyway because the file format demands
+		# it.  DT:TZ:SystemV would object, so as a special
+		# exception we ignore the TZ value in this case.
+		$late_rule = undef;
 	}
 	if(defined $late_rule) {
 		$obs_types[-1] = $late_rule eq "" ? undef : do {
@@ -301,23 +340,28 @@ sub is_utc { 0 }
 
 =item $tz->is_olson
 
-Returns false.  The files interpreted by this class are actually very
-likely to be from the Olson database, but false is returned to indicate
-that the values returned by the C<category> and C<name> methods are not
-as would be expected for an Olson timezone.  This behaviour may change
-in a future version.
+Returns the truth value that was provided to the constructor for this
+purpose, default false.  This nominally indicates whether the timezone
+data is from the Olson database.  The files interpreted by this class
+are very likely to be from the Olson database, but there is no explicit
+indicator for this in the file, so this information must be supplied to
+the constructor if required.
 
 =cut
 
-sub is_olson { 0 }
+sub is_olson { $_[0]->{is_olson} }
 
 =item $tz->category
 
-Returns C<undef>, because the category can't be determined from the file.
+Returns the value that was provided to the constructor for this purpose,
+default C<undef>.  This is intended to indicate the general region
+(continent or ocean) in which a geographical timezone is used, when
+the timezone is named according to the hierarchical scheme of the Olson
+timezone database.
 
 =cut
 
-sub category { undef }
+sub category { $_[0]->{category} }
 
 =item $tz->name
 
@@ -458,13 +502,17 @@ sub offset_for_local_datetime {
 	my($self, $dt) = @_;
 	my($lcl_rdn, $lcl_sod) = $dt->local_rd_values;
 	$lcl_sod = 86399 if $lcl_sod >= 86400;
+	my $seen_undefined;
 	foreach my $offset (@{$self->{offsets}}) {
 		my($utc_rdn, $utc_sod) =
 			_local_to_utc_rdn_sod($lcl_rdn, $lcl_sod, $offset);
 		my $ttype = eval { local $SIG{__DIE__};
 			$self->_type_for_rdn_sod($utc_rdn, $utc_sod);
 		};
-		next unless defined $ttype;
+		unless(defined $ttype) {
+			$seen_undefined = 1;
+			next;
+		}
 		my $local_offset = ref($ttype) eq "ARRAY" ? $ttype->[0] :
 			eval { local $SIG{__DIE__};
 				$ttype->offset_for_local_datetime($dt);
@@ -472,7 +520,8 @@ sub offset_for_local_datetime {
 		return $offset
 			if defined($local_offset) && $local_offset == $offset;
 	}
-	croak "non-existent local time due to offset change";
+	croak "non-existent local time due to ".
+		($seen_undefined ? "zone disuse" : "offset change");
 }
 
 =back
@@ -481,6 +530,9 @@ sub offset_for_local_datetime {
 
 L<DateTime>,
 L<DateTime::TimeZone>,
+L<DateTime::TimeZone::Olson>,
+L<Time::OlsonTZ::Data>,
+L<Time::OlsonTZ::Download>,
 L<tzfile(5)>
 
 =head1 AUTHOR

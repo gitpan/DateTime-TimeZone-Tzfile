@@ -1,3 +1,24 @@
+version 0.004; 2010-08-31
+
+  * for the Olson "Factory" timezone, which has a pseudo-abbreviation
+    containing spaces, don't process the TZ value that it contains,
+    because it's invalid and DateTime::TimeZone::SystemV objects to it
+
+  * tighten the criteria for recognising the special observance that
+    indicates that local time is not defined (abbreviation "zzz" was
+    previously the sole criterion, now also require zero offset and
+    not DST)
+
+  * allow the ->is_olson and ->category values to be specified to the
+    constructor, instead of having fixed values
+
+  * when a local time is non-existent due to an undefined observance,
+    give an error message that says so, rather than conflating it with
+    local time being non-existent due to an offset change
+
+  * test the error message that is given when a local time does not
+    exist due to an offset change
+
 version 0.003; 2010-07-30
 
   * in documentation, correct one use of "filename" to "filehandle"

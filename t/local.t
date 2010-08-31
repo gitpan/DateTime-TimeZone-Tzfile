@@ -5,7 +5,7 @@ use Test::More;
 
 eval { require DateTime; };
 plan skip_all => "DateTime not available" unless $@ eq "";
-plan tests => 22;
+plan tests => 28;
 
 require_ok "DateTime::TimeZone::Tzfile";
 
@@ -20,6 +20,9 @@ sub try($$) {
 			       time_zone => "floating");
 	is eval { $tz->offset_for_local_datetime($dt) }, $offset,
 		"offset for $timespec";
+	if(!defined($offset)) {
+		like $@, qr/\Anon-existent local time due to offset change/;
+	}
 }
 
 $tz = DateTime::TimeZone::Tzfile->new("t/london.tz");
