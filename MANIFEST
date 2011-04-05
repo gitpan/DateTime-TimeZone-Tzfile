@@ -2,11 +2,14 @@
 Build.PL
 Changes
 MANIFEST
+META.json
 META.yml
 Makefile.PL
 README
 lib/DateTime/TimeZone/Tzfile.pm
+t/cairo.tz
 t/construct.t
+t/crlf.t
 t/ident.t
 t/local.t
 t/london.tz

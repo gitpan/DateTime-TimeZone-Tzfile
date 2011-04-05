@@ -42,10 +42,10 @@ use warnings;
 use strict;
 
 use Carp qw(croak);
-use IO::File 1.03;
+use IO::File 1.13;
 use IO::Handle 1.08;
 
-our $VERSION = "0.004";
+our $VERSION = "0.005";
 
 # _fdiv(A, B), _fmod(A, B): divide A by B, flooring remainder
 #
@@ -204,7 +204,7 @@ sub new {
 		$self->{is_olson} = !!0;
 	}
 	if(defined $filename) {
-		$fh = IO::File->new($filename, "r")
+		($fh = IO::File->new($filename, "r")) && $fh->binmode
 			or croak "can't read $filename: $!";
 	}
 	croak "bad tzfile: wrong magic number"
@@ -541,7 +541,8 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2007, 2009, 2010 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2007, 2009, 2010, 2011
+Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 

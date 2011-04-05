@@ -1,3 +1,11 @@
+version 0.005; 2011-04-05
+
+  * bugfix: read tzfiles in binary mode
+
+  * include META.json in distribution
+
+  * add MYMETA.json to .cvsignore
+
 version 0.004; 2010-08-31
 
   * for the Olson "Factory" timezone, which has a pseudo-abbreviation
@@ -15,6 +23,9 @@ version 0.004; 2010-08-31
   * when a local time is non-existent due to an undefined observance,
     give an error message that says so, rather than conflating it with
     local time being non-existent due to an offset change
+
+  * add DateTime::TimeZone::Olson, Time::OlsonTZ::Data, and
+    Time::OlsonTZ::Download to the "see also" list
 
   * test the error message that is given when a local time does not
     exist due to an offset change

@@ -14,7 +14,7 @@ Module::Build->new(
 		"warnings" => 0,
 	},
 	build_requires => {
-		"IO::File" => "1.03",
+		"IO::File" => "1.13",
 		"Module::Build" => 0,
 		"Test::More" => 0,
 		"perl" => "5.006",
@@ -24,7 +24,7 @@ Module::Build->new(
 	requires => {
 		"Carp" => 0,
 		"DateTime::TimeZone::SystemV" => "0.002",
-		"IO::File" => "1.03",
+		"IO::File" => "1.13",
 		"IO::Handle" => "1.08",
 		"constant" => 0,
 		"integer" => 0,

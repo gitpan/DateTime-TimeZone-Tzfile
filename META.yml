@@ -3,7 +3,7 @@ abstract: 'tzfile (zoneinfo) timezone files'
 author:
   - 'Andrew Main (Zefram) <zefram@fysh.org>'
 build_requires:
-  IO::File: 1.03
+  IO::File: 1.13
   Module::Build: 0
   Test::More: 0
   perl: 5.006
@@ -14,9 +14,8 @@ configure_requires:
   perl: 5.006
   strict: 0
   warnings: 0
-distribution_type: module
 dynamic_config: 0
-generated_by: 'Module::Build version 0.3607'
+generated_by: 'Module::Build version 0.38, CPAN::Meta::Converter version 2.110580'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -25,11 +24,11 @@ name: DateTime-TimeZone-Tzfile
 provides:
   DateTime::TimeZone::Tzfile:
     file: lib/DateTime/TimeZone/Tzfile.pm
-    version: 0.004
+    version: 0.005
 requires:
   Carp: 0
   DateTime::TimeZone::SystemV: 0.002
-  IO::File: 1.03
+  IO::File: 1.13
   IO::Handle: 1.08
   constant: 0
   integer: 0
@@ -38,4 +37,4 @@ requires:
   warnings: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.004
+version: 0.005
