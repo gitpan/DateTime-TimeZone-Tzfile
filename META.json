@@ -4,7 +4,7 @@
       "Andrew Main (Zefram) <zefram@fysh.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.110580",
+   "generated_by" : "Module::Build version 0.38, CPAN::Meta::Converter version 2.112580",
    "license" : [
       "perl_5"
    ],
@@ -16,6 +16,8 @@
    "prereqs" : {
       "build" : {
          "requires" : {
+            "Date::ISO8601" : 0,
+            "Date::JD" : "0.005",
             "IO::File" : "1.13",
             "Module::Build" : 0,
             "Test::More" : 0,
@@ -35,9 +37,12 @@
       "runtime" : {
          "requires" : {
             "Carp" : 0,
+            "Date::ISO8601" : 0,
+            "Date::JD" : "0.005",
             "DateTime::TimeZone::SystemV" : "0.002",
             "IO::File" : "1.13",
             "IO::Handle" : "1.08",
+            "Params::Classify" : 0,
             "constant" : 0,
             "integer" : 0,
             "perl" : "5.006",
@@ -49,7 +54,7 @@
    "provides" : {
       "DateTime::TimeZone::Tzfile" : {
          "file" : "lib/DateTime/TimeZone/Tzfile.pm",
-         "version" : "0.005"
+         "version" : "0.006"
       }
    },
    "release_status" : "stable",
@@ -58,5 +63,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.005"
+   "version" : "0.006"
 }

@@ -42,10 +42,13 @@ use warnings;
 use strict;
 
 use Carp qw(croak);
+use Date::ISO8601 0.000 qw(present_ymd);
+use Date::JD 0.005 qw(rdn_to_cjdnn);
 use IO::File 1.13;
 use IO::Handle 1.08;
+use Params::Classify 0.000 qw(is_undef is_string);
 
-our $VERSION = "0.005";
+our $VERSION = "0.006";
 
 # _fdiv(A, B), _fmod(A, B): divide A by B, flooring remainder
 #
@@ -79,7 +82,7 @@ encoded in the file.  The following attributes may be given:
 =item B<name>
 
 Name for the timezone object.  This will be returned by the C<name>
-method described below.
+method described below, and will be included in certain error messages.
 
 =item B<category>
 
@@ -171,10 +174,14 @@ sub new {
 		if($attr eq "name") {
 			croak "timezone name specified redundantly"
 				if exists $self->{name};
+			croak "timezone name must be a string"
+				unless is_string($value);
 			$self->{name} = $value;
 		} elsif($attr eq "category") {
 			croak "category value specified redundantly"
 				if exists $self->{category};
+			croak "category value must be a string or undef"
+				unless is_undef($value) || is_string($value);
 			$self->{category} = $value;
 		} elsif($attr eq "is_olson") {
 			croak "is_olson flag specified redundantly"
@@ -183,6 +190,8 @@ sub new {
 		} elsif($attr eq "filename") {
 			croak "filename specified redundantly"
 				if defined($filename) || defined($fh);
+			croak "filename must be a string"
+				unless is_string($value);
 			$filename = $value;
 		} elsif($attr eq "filehandle") {
 			croak "filehandle specified redundantly"
@@ -407,7 +416,15 @@ sub _type_for_rdn_sod {
 		}
 	}
 	my $type = $self->{obs_types}->[$lo];
-	croak "local time not defined for this time" unless defined $type;
+	unless(defined $type) {
+		croak "time @{[present_ymd(rdn_to_cjdnn($utc_rdn))]}T@{[
+			sprintf(q(%02d:%02d:%02d),
+				int($utc_sod/3600),
+				int($utc_sod/60)%60,
+				$utc_sod%60)
+		]}Z is not represented in the @{[$self->{name}]} timezone ".
+			"due to zone disuse";
+	}
 	return $type;
 }
 
@@ -520,8 +537,13 @@ sub offset_for_local_datetime {
 		return $offset
 			if defined($local_offset) && $local_offset == $offset;
 	}
-	croak "non-existent local time due to ".
-		($seen_undefined ? "zone disuse" : "offset change");
+	croak "local time @{[present_ymd(rdn_to_cjdnn($lcl_rdn))]}T@{[
+		sprintf(q(%02d:%02d:%02d),
+			int($lcl_sod/3600),
+			int($lcl_sod/60)%60,
+			$lcl_sod%60)
+	]} does not exist in the @{[$self->{name}]} timezone due to ".
+		"@{[$seen_undefined ? q(zone disuse) : q(offset change)]}";
 }
 
 =back

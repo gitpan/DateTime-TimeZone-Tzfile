@@ -2,7 +2,7 @@ use warnings;
 use strict;
 
 use IO::File 1.13;
-use Test::More tests => 21;
+use Test::More tests => 32;
 
 require_ok "DateTime::TimeZone::Tzfile";
 
@@ -76,5 +76,21 @@ eval {
 		filehandle => new_fh());
 };
 like $@, qr/\Afilehandle specified redundantly\b/;
+
+foreach(
+	undef,
+	[],
+	*STDOUT,
+	bless({}),
+) {
+	eval { DateTime::TimeZone::Tzfile->new(name => $_) };
+	like $@, qr/\Atimezone name must be a string\b/;
+	if(defined $_) {
+		eval { DateTime::TimeZone::Tzfile->new(category => $_) };
+		like $@, qr/\Acategory value must be a string or undef\b/;
+	}
+	eval { DateTime::TimeZone::Tzfile->new(filename => $_) };
+	like $@, qr/\Afilename must be a string\b/;
+}
 
 1;

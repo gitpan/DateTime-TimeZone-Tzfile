@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.66.
+signed via the Module::Signature module, version 0.68.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -15,27 +15,27 @@ not run its Makefile.PL or Build.PL.
 Hash: SHA1
 
 SHA1 6e453f3b6376d5b468b21b97c7e66176c083452a .cvsignore
-SHA1 d56cbd6f5dd0ec6b360f073c5fd8da279d0fe92f Build.PL
-SHA1 fb8f54dcb7d5905c059f98811c83a4f48bcf33ef Changes
+SHA1 11dc0d15fe1431d155153749d3d8df3d9d83cbea Build.PL
+SHA1 d7be453e40f1792ff504910831e21cdb5a8eaca2 Changes
 SHA1 bba931044f5559d3086edf52ea3a8f2b0dbe3962 MANIFEST
-SHA1 ecb172a3ce87372c49c7368316dd69db0f894d35 META.json
-SHA1 3c08fc787c75e3f50b08e0496ba76b51cf05abd6 META.yml
+SHA1 8f437c3c4e39a8d5aa802a3b9d6ddeafd943565f META.json
+SHA1 a683793695e107b7395deb7fe4e51e5fc9009108 META.yml
 SHA1 a4df8e97ccd390a42212af5a9f4d0986c85e7a5f Makefile.PL
 SHA1 6ec4a53b21aceff2f46fae1f317df6fca6d3b9db README
-SHA1 87f85d4ac8b6de9f7eedad11c09a53587522ce84 lib/DateTime/TimeZone/Tzfile.pm
+SHA1 d6fd0a9e3578322360006f111dca1d9796e5eecd lib/DateTime/TimeZone/Tzfile.pm
 SHA1 b241641219520491d65ce891195f89cb91709861 t/cairo.tz
-SHA1 8cb9c3dd69f1067d42399afc3f158628c1334ed5 t/construct.t
+SHA1 102a697901d431c610c2154f6b64698a84d50f8c t/construct.t
 SHA1 ed2775cc8e7a1711d3ab9be3be8ac48a664cf69c t/crlf.t
-SHA1 098a25eba48989e963ccfda2f64a5a52c9e825b4 t/ident.t
-SHA1 cc07f9f69851b0cf0f74c1787363d0a46927140e t/local.t
+SHA1 deb0b94c07a5748b9e6dd75e7c2f773491f7a327 t/ident.t
+SHA1 859e41affbc7ffcc722839f460f750a8380b7c19 t/local.t
 SHA1 e203aaf15eecc56c069b59f482f8ae3655c249a9 t/london.tz
-SHA1 3d0fb57dfec20242135862bcd3b93e5c10f5b8a4 t/offset.t
+SHA1 943dffb2351505c87ffb9b221ed6692d546e387c t/offset.t
 SHA1 904d9a4f76525e2303e4b0c168c68230f223c8de t/pod_cvg.t
 SHA1 65c75abdef6f01a5d1588a307f2ddfe2333dc961 t/pod_syn.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.10 (GNU/Linux)
 
-iEYEARECAAYFAk2almIACgkQOV9mt2VyAVGuBgCZATOtkO1Lpz1aXqGO+XHuDSF6
-MmEAn2mTW8SJb0CXkXw1ronIuTaZlw+u
-=K5Px
+iEYEARECAAYFAk6CMSgACgkQOV9mt2VyAVFmjwCfQ2FOSqv4yxWW1YtwOK6ittJ0
+294An3+0QFfIzGUcMW6TeL2SwLxx2hdF
+=ovC2
 -----END PGP SIGNATURE-----

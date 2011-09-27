@@ -1,3 +1,12 @@
+version 0.006; 2011-09-27
+
+  * include the time and zone name in error messages about non-existent
+    local time and unrepresented time
+
+  * check argument types in constructor
+
+  * make test suite work even if DateTime is not available
+
 version 0.005; 2011-04-05
 
   * bugfix: read tzfiles in binary mode
