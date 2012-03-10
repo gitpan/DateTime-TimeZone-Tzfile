@@ -1,4 +1,4 @@
-.cvsignore
+.gitignore
 Build.PL
 Changes
 MANIFEST
@@ -7,12 +7,15 @@ META.yml
 Makefile.PL
 README
 lib/DateTime/TimeZone/Tzfile.pm
-t/cairo.tz
+t/Davis.tz
+t/Kaliningrad.tz
+t/London.tz
+t/Loyston.tz
+t/San_Luis.tz
 t/construct.t
 t/crlf.t
 t/ident.t
 t/local.t
-t/london.tz
 t/offset.t
 t/pod_cvg.t
 t/pod_syn.t

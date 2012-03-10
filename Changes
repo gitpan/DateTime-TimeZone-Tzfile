@@ -1,3 +1,28 @@
+version 0.007; 2012-03-10
+
+  * bugfix: recognise zone disuse indicator if it comes in the form of
+    the POSIX-TZ extension rule
+
+  * distinguish between zone disuse and missing data
+
+  * eliminate use of Date::JD, because it's too heavy to justify the
+    minimal convenience gained from it
+
+  * eliminate use of constant.pm, for stylistic consistency
+
+  * test more error cases
+
+  * test behaviour around leap seconds
+
+  * factor out date/time presentation code used for error messages
+
+  * for CRLF test, use a smaller tzfile that tickles the same potential
+    bug
+
+  * give test tzfiles appropriately capitalised names
+
+  * convert .cvsignore to .gitignore
+
 version 0.006; 2011-09-27
 
   * include the time and zone name in error messages about non-existent

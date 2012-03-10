@@ -1,16 +1,16 @@
 use warnings;
 use strict;
 
-use Test::More tests => 1486;
+use Test::More tests => 1693;
 
 {
 	package FakeUtcDateTime;
 	use Date::ISO8601 0.000 qw(ymd_to_cjdn);
-	use Date::JD 0.005 qw(cjdn_to_rdnn);
+	my $rdn_epoch_cjdn = 1721425;
 	sub new {
 		my($class, $y, $mo, $d, $h, $mi, $s) = @_;
 		return bless({
-			rdn => cjdn_to_rdnn(ymd_to_cjdn($y, $mo, $d)),
+			rdn => ymd_to_cjdn($y, $mo, $d) - $rdn_epoch_cjdn,
 			sod => 3600*$h + 60*$mi + $s,
 		}, $class);
 	}
@@ -21,17 +21,40 @@ require_ok "DateTime::TimeZone::Tzfile";
 
 my $tz;
 
-sub try($$$$) {
+sub try($$;$$) {
 	my($timespec, $is_dst, $offset, $abbrev) = @_;
 	$timespec =~ /\A([0-9]{4})-([0-9]{2})-([0-9]{2})T
 			([0-9]{2}):([0-9]{2}):([0-9]{2})Z\z/x or die;
 	my $dt = FakeUtcDateTime->new("$1", "$2", "$3", "$4", "$5", "$6");
-	is !!$tz->is_dst_for_datetime($dt), !!$is_dst, "is DST for $timespec";
-	is $tz->offset_for_datetime($dt), $offset, "offset for $timespec";
-	is $tz->short_name_for_datetime($dt), $abbrev, "abbrev for $timespec";
+	my $errcond;
+	unless($is_dst =~ /\A[01]\z/) {
+		$errcond = $is_dst;
+		$is_dst = undef;
+	}
+	if(defined $is_dst) {
+		is !!$tz->is_dst_for_datetime($dt), !!$is_dst,
+			"is DST for $timespec";
+		is $tz->offset_for_datetime($dt), $offset,
+			"offset for $timespec";
+		is $tz->short_name_for_datetime($dt), $abbrev,
+			"abbrev for $timespec";
+	} else {
+		foreach my $method (qw(
+			is_dst_for_datetime
+			offset_for_datetime
+			short_name_for_datetime
+		)) {
+			eval { $tz->$method($dt) };
+			like $@, qr#\A
+				time\ \Q$timespec\E\ is\ not\ represented
+				\ in\ the\ [!-~]+\ timezone
+				\ due\ to\ \Q$errcond\E
+			\b#x, "$method error message for $timespec";
+		}
+	}
 }
 
-$tz = DateTime::TimeZone::Tzfile->new("t/london.tz");
+$tz = DateTime::TimeZone::Tzfile->new("t/London.tz");
 try "1800-01-01T00:00:00Z", 0,    -75, "LMT";
 try "1847-12-01T00:01:14Z", 0,    -75, "LMT";
 try "1847-12-01T00:01:15Z", 0,     +0, "GMT";
@@ -527,5 +550,94 @@ try "2039-03-27T00:59:59Z", 0,     +0, "GMT";
 try "2039-03-27T01:00:00Z", 1,  +3600, "BST";
 try "2039-10-30T00:59:59Z", 1,  +3600, "BST";
 try "2039-10-30T01:00:00Z", 0,     +0, "GMT";
+
+# The Davis base in Antarctica has been uninhabited at times.
+$tz = DateTime::TimeZone::Tzfile->new("t/Davis.tz");
+try "1953-07-01T12:00:00Z", "zone disuse";
+try "1957-01-12T23:59:59Z", "zone disuse";
+try "1957-01-13T00:00:00Z", 0, +25200, "DAVT";
+try "1960-01-01T12:00:00Z", 0, +25200, "DAVT";
+try "1964-10-31T16:59:59Z", 0, +25200, "DAVT";
+try "1964-10-31T17:00:00Z", "zone disuse";
+try "1967-01-01T12:00:00Z", "zone disuse";
+try "1969-01-31T23:59:59Z", "zone disuse";
+try "1969-02-01T00:00:00Z", 0, +25200, "DAVT";
+try "1980-01-01T12:00:00Z", 0, +25200, "DAVT";
+try "2009-10-17T18:59:59Z", 0, +25200, "DAVT";
+try "2009-10-17T19:00:00Z", 0, +18000, "DAVT";
+try "2010-01-01T12:00:00Z", 0, +18000, "DAVT";
+try "2010-03-10T19:59:59Z", 0, +18000, "DAVT";
+try "2010-03-10T20:00:00Z", 0, +25200, "DAVT";
+try "2011-01-01T12:00:00Z", 0, +25200, "DAVT";
+
+# This version of San_Luis.tz has no POSIX-TZ extension rule, because
+# the source data ends with an indefinite-future observance that is on
+# DST, and that can't be expressed in a POSIX-TZ recipe.  The correct
+# interpretation of the tzfile is that the zone behaviour is unknown
+# after the final transition time.
+$tz = DateTime::TimeZone::Tzfile->new("t/San_Luis.tz");
+try "2008-01-01T12:00:00Z", 1,  -7200, "ARST";
+try "2008-01-21T01:59:59Z", 1,  -7200, "ARST";
+try "2008-01-21T02:00:00Z", 1, -10800, "WARST";
+try "2008-03-09T02:59:59Z", 1, -10800, "WARST";
+try "2008-03-09T03:00:00Z", 0, -14400, "WART";
+try "2008-10-12T03:59:59Z", 0, -14400, "WART";
+try "2008-10-12T04:00:00Z", 1, -10800, "WARST";
+try "2009-03-08T02:59:59Z", 1, -10800, "WARST";
+try "2009-03-08T03:00:00Z", 0, -14400, "WART";
+try "2009-10-11T03:59:59Z", 0, -14400, "WART";
+try "2009-10-11T04:00:00Z", "missing data";
+try "2010-01-01T12:00:00Z", "missing data";
+
+# Loyston was settled in the early 19th century and ultimately abandoned
+# in 1936 to make way for the Norris Lake.  This tzfile is not from the
+# Olson database.  It's here to test the handling of a presently-disused
+# zone.
+$tz = DateTime::TimeZone::Tzfile->new("t/Loyston.tz");
+try "1799-01-01T12:00:00Z", "zone disuse";
+try "1799-12-31T23:59:59Z", "zone disuse";
+try "1800-01-01T00:00:00Z", 0, -20144, "LMT";
+try "1883-11-18T16:59:59Z", 0, -20144, "LMT";
+try "1883-11-18T17:00:00Z", 0, -18000, "EST";
+try "1918-03-31T06:59:59Z", 0, -18000, "EST";
+try "1918-03-31T07:00:00Z", 1, -14400, "EDT";
+try "1918-10-27T05:59:59Z", 1, -14400, "EDT";
+try "1918-10-27T06:00:00Z", 0, -18000, "EST";
+try "1919-03-30T06:59:59Z", 0, -18000, "EST";
+try "1919-03-30T07:00:00Z", 1, -14400, "EDT";
+try "1919-10-26T05:59:59Z", 1, -14400, "EDT";
+try "1919-10-26T06:00:00Z", 0, -18000, "EST";
+try "1936-03-04T04:59:59Z", 0, -18000, "EST";
+try "1936-03-04T05:00:00Z", "zone disuse";
+try "1937-01-01T12:00:00Z", "zone disuse";
+
+# leap seconds, including changes occurring immediately after a leap second
+# (these are not real leap second dates)
+$tz = DateTime::TimeZone::Tzfile->new("t/Kaliningrad.tz");
+try "2005-02-01T12:00:00Z", 0,  +7200, "EET";
+try "2005-02-01T23:59:59Z", 0,  +7200, "EET";
+try "2005-02-01T23:59:60Z", 0,  +7200, "EET";
+try "2005-02-02T00:00:00Z", 0,  +7200, "EET";
+try "2005-02-02T12:00:00Z", 0,  +7200, "EET";
+try "2005-03-26T12:00:00Z", 0,  +7200, "EET";
+try "2005-03-26T23:59:59Z", 0,  +7200, "EET";
+try "2005-03-26T23:59:60Z", 0,  +7200, "EET";
+try "2005-03-27T00:00:00Z", 1, +10800, "EEST";
+try "2005-03-27T12:00:00Z", 1, +10800, "EEST";
+try "2005-04-01T12:00:00Z", 1, +10800, "EEST";
+try "2005-04-01T23:59:59Z", 1, +10800, "EEST";
+try "2005-04-01T23:59:60Z", 1, +10800, "EEST";
+try "2005-04-02T00:00:00Z", 1, +10800, "EEST";
+try "2005-04-02T12:00:00Z", 1, +10800, "EEST";
+try "2005-10-29T12:00:00Z", 1, +10800, "EEST";
+try "2005-10-29T23:59:59Z", 1, +10800, "EEST";
+try "2005-10-29T23:59:60Z", 1, +10800, "EEST";
+try "2005-10-30T00:00:00Z", 0,  +7200, "EET";
+try "2005-10-30T12:00:00Z", 0,  +7200, "EET";
+try "2005-12-01T12:00:00Z", 0,  +7200, "EET";
+try "2005-12-01T23:59:59Z", 0,  +7200, "EET";
+try "2005-12-01T23:59:60Z", 0,  +7200, "EET";
+try "2005-12-02T00:00:00Z", 0,  +7200, "EET";
+try "2005-12-02T12:00:00Z", 0,  +7200, "EET";
 
 1;

@@ -43,12 +43,13 @@ use strict;
 
 use Carp qw(croak);
 use Date::ISO8601 0.000 qw(present_ymd);
-use Date::JD 0.005 qw(rdn_to_cjdnn);
 use IO::File 1.13;
 use IO::Handle 1.08;
-use Params::Classify 0.000 qw(is_undef is_string);
+use Params::Classify 0.000 qw(is_undef is_string is_ref);
 
-our $VERSION = "0.006";
+our $VERSION = "0.007";
+
+my $rdn_epoch_cjdn = 1721425;
 
 # _fdiv(A, B), _fmod(A, B): divide A by B, flooring remainder
 #
@@ -138,11 +139,11 @@ sub _read_s32($) {
 
 sub _read_u8($) { ord(_saferead($_[0], 1)) }
 
-use constant UNIX_EPOCH_RDN => 719163;
+my $unix_epoch_rdn = 719163;
 
 sub _read_tm32($) {
 	my $t = _read_s32($_[0]);
-	return [ UNIX_EPOCH_RDN + _fdiv($t, 86400), _fmod($t, 86400) ];
+	return [ $unix_epoch_rdn + _fdiv($t, 86400), _fmod($t, 86400) ];
 }
 
 sub _read_tm64($) {
@@ -158,10 +159,10 @@ sub _read_tm64($) {
 	my $d4 = _fdiv($th, 86400);
 	$th = _fmod($th, 86400);
 	my $d = $dh * 4294967296 + $d2 * 4194304 + (($d3 << 12) + $d4);
-	return [ UNIX_EPOCH_RDN + $d, $th ];
+	return [ $unix_epoch_rdn + $d, $th ];
 }
 
-use constant FACTORY_ABBR => "Local time zone must be set--see zic manual page";
+my $factory_abbr = "Local time zone must be set--see zic manual page";
 
 sub new {
 	my $class = shift;
@@ -282,7 +283,7 @@ sub new {
 				$types[$i]->[2] eq "zzz") {
 			# "zzz" means the zone is not defined at this time,
 			# due for example to the location being uninhabited
-			$types[$i] = undef;
+			$types[$i] = "zone disuse";
 		} else {
 			$offsets{$types[$i]->[0]} = undef;
 		}
@@ -294,10 +295,10 @@ sub new {
 			if $obs_type >= $typecnt;
 		$obs_type = $types[$obs_type];
 	}
-	if(defined($late_rule) && $late_rule eq "<".FACTORY_ABBR.">0" &&
+	if(defined($late_rule) && $late_rule eq "<$factory_abbr>0" &&
 			defined($obs_types[-1]) && $obs_types[-1]->[0] == 0 &&
 			!$obs_types[-1]->[1] &&
-			$obs_types[-1]->[2] eq FACTORY_ABBR) {
+			$obs_types[-1]->[2] eq $factory_abbr) {
 		# This bizarre timezone abbreviation is used in the Factory
 		# timezone in the Olson database.  It's not valid in a
 		# SysV-style TZ value, because it contains spaces, but zic
@@ -307,16 +308,29 @@ sub new {
 		$late_rule = undef;
 	}
 	if(defined $late_rule) {
-		$obs_types[-1] = $late_rule eq "" ? undef : do {
+		if($late_rule eq "") {
+			$obs_types[-1] = "missing data";
+		} elsif($late_rule =~
+				/\A(?:zzz|<zzz>)[-+]?00?(?::00(?::00)?)?\z/) {
+			$obs_types[-1] = "zone disuse";
+		} else {
 			require DateTime::TimeZone::SystemV;
 			DateTime::TimeZone::SystemV->VERSION("0.002");
-			DateTime::TimeZone::SystemV->new($late_rule);
-		};
+			$obs_types[-1] =
+				DateTime::TimeZone::SystemV->new($late_rule);
+		}
 	}
 	$self->{trn_times} = \@trn_times;
 	$self->{obs_types} = \@obs_types;
 	$self->{offsets} = [ sort { $a <=> $b } keys %offsets ];
 	return $self;
+}
+
+sub _present_rdn_sod($$) {
+	my($rdn, $sod) = @_;
+	return sprintf("%sT%02d:%02d:%02d",
+		present_ymd($rdn + $rdn_epoch_cjdn),
+		int($sod/3600), int($sod/60)%60, $sod%60);
 }
 
 =back
@@ -415,24 +429,21 @@ sub _type_for_rdn_sod {
 			$lo = $try + 1;
 		}
 	}
-	my $type = $self->{obs_types}->[$lo];
-	unless(defined $type) {
-		croak "time @{[present_ymd(rdn_to_cjdnn($utc_rdn))]}T@{[
-			sprintf(q(%02d:%02d:%02d),
-				int($utc_sod/3600),
-				int($utc_sod/60)%60,
-				$utc_sod%60)
-		]}Z is not represented in the @{[$self->{name}]} timezone ".
-			"due to zone disuse";
-	}
-	return $type;
+	return $self->{obs_types}->[$lo];
 }
 
 sub _type_for_datetime {
 	my($self, $dt) = @_;
 	my($utc_rdn, $utc_sod) = $dt->utc_rd_values;
 	$utc_sod = 86399 if $utc_sod >= 86400;
-	return $self->_type_for_rdn_sod($utc_rdn, $utc_sod);
+	my $type = $self->_type_for_rdn_sod($utc_rdn, $utc_sod);
+	if(is_string($type)) {
+		croak "time @{[_present_rdn_sod($utc_rdn, $utc_sod)]}Z ".
+			"is not represented ".
+			"in the @{[$self->{name}]} timezone ".
+			"due to $type";
+	}
+	return $type;
 }
 
 =item $tz->offset_for_datetime(DT)
@@ -446,7 +457,7 @@ is in effect at the instant represented by I<DT>, in seconds.
 sub offset_for_datetime {
 	my($self, $dt) = @_;
 	my $type = $self->_type_for_datetime($dt);
-	return ref($type) eq "ARRAY" ? $type->[0] :
+	return is_ref($type, "ARRAY") ? $type->[0] :
 		$type->offset_for_datetime($dt);
 }
 
@@ -463,7 +474,7 @@ affect anything else.
 sub is_dst_for_datetime {
 	my($self, $dt) = @_;
 	my $type = $self->_type_for_datetime($dt);
-	return ref($type) eq "ARRAY" ? $type->[1] :
+	return is_ref($type, "ARRAY") ? $type->[1] :
 		$type->is_dst_for_datetime($dt);
 }
 
@@ -480,7 +491,7 @@ either the timezone or the offset.
 sub short_name_for_datetime {
 	my($self, $dt) = @_;
 	my $type = $self->_type_for_datetime($dt);
-	return ref($type) eq "ARRAY" ? $type->[2] :
+	return is_ref($type, "ARRAY") ? $type->[2] :
 		$type->short_name_for_datetime($dt);
 }
 
@@ -519,31 +530,33 @@ sub offset_for_local_datetime {
 	my($self, $dt) = @_;
 	my($lcl_rdn, $lcl_sod) = $dt->local_rd_values;
 	$lcl_sod = 86399 if $lcl_sod >= 86400;
-	my $seen_undefined;
+	my %seen_error;
 	foreach my $offset (@{$self->{offsets}}) {
 		my($utc_rdn, $utc_sod) =
 			_local_to_utc_rdn_sod($lcl_rdn, $lcl_sod, $offset);
-		my $ttype = eval { local $SIG{__DIE__};
-			$self->_type_for_rdn_sod($utc_rdn, $utc_sod);
-		};
-		unless(defined $ttype) {
-			$seen_undefined = 1;
+		my $ttype = $self->_type_for_rdn_sod($utc_rdn, $utc_sod);
+		if(is_string($ttype)) {
+			$seen_error{$ttype} = undef;
 			next;
 		}
-		my $local_offset = ref($ttype) eq "ARRAY" ? $ttype->[0] :
+		my $local_offset = is_ref($ttype, "ARRAY") ? $ttype->[0] :
 			eval { local $SIG{__DIE__};
 				$ttype->offset_for_local_datetime($dt);
 			};
 		return $offset
 			if defined($local_offset) && $local_offset == $offset;
 	}
-	croak "local time @{[present_ymd(rdn_to_cjdnn($lcl_rdn))]}T@{[
-		sprintf(q(%02d:%02d:%02d),
-			int($lcl_sod/3600),
-			int($lcl_sod/60)%60,
-			$lcl_sod%60)
-	]} does not exist in the @{[$self->{name}]} timezone due to ".
-		"@{[$seen_undefined ? q(zone disuse) : q(offset change)]}";
+	my $error;
+	foreach("zone disuse", "missing data") {
+		if(exists $seen_error{$_}) {
+			$error = $_;
+			last;
+		}
+	}
+	$error ||= "offset change";
+	croak "local time @{[_present_rdn_sod($lcl_rdn, $lcl_sod)]} ".
+		"does not exist in the @{[$self->{name}]} timezone ".
+		"due to $error";
 }
 
 =back
@@ -563,7 +576,7 @@ Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2007, 2009, 2010, 2011
+Copyright (C) 2007, 2009, 2010, 2011, 2012
 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
