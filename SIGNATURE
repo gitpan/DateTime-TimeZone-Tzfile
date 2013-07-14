@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.68.
+signed via the Module::Signature module, version 0.70.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -15,14 +15,14 @@ not run its Makefile.PL or Build.PL.
 Hash: SHA1
 
 SHA1 39b83fb4caa81801a2a6f26e1f96241c958dafac .gitignore
-SHA1 63287b536ca4d7fd1e22e3a230cd6cac8372a85a Build.PL
-SHA1 b9de5652a1134e21423fb7ec9034e8d9bbeb641f Changes
+SHA1 44b3807230424fb4c419318dc4e628fea696d770 Build.PL
+SHA1 0d6c9f45c8ea6aff2c19a3a6693c37da506e34d9 Changes
 SHA1 580c27eeabb5bfdd069eecf6d14377faa26a9271 MANIFEST
-SHA1 1df06254caedcccfcc9ddc41ad0dc6c074c52284 META.json
-SHA1 2ded9d334c06ccaca727005fb13f29ba839075cf META.yml
-SHA1 a249be72fc0b310375871d710790dd94e08a12f0 Makefile.PL
-SHA1 1b9502d4601cb9ab08eaa4bcd49bff5a4723b0b9 README
-SHA1 a7296578f7c12a5ee0e309568408959a23de124d lib/DateTime/TimeZone/Tzfile.pm
+SHA1 0b24f96d6c14d91987e7788928b830b4b34d7e02 META.json
+SHA1 a3a861774c94133614f9ee2bb4d087910374b0bf META.yml
+SHA1 d644f6f709bd3f1269c64f491a7a34a0b7fad19f Makefile.PL
+SHA1 f7bcb6666d4aec3bc580cacd1ee8d90bc7e0f8f5 README
+SHA1 5c57b9a0cd8c59324832b8dfa8716e2337b9341d lib/DateTime/TimeZone/Tzfile.pm
 SHA1 aee65210dec1a21938a8f9e26eae8e74a06849c3 t/Davis.tz
 SHA1 d297f080067251860bb860aadb42540757ccb5c1 t/Kaliningrad.tz
 SHA1 e203aaf15eecc56c069b59f482f8ae3655c249a9 t/London.tz
@@ -36,9 +36,9 @@ SHA1 e724bb975edf23747bb6f907047ca2783e392633 t/offset.t
 SHA1 904d9a4f76525e2303e4b0c168c68230f223c8de t/pod_cvg.t
 SHA1 65c75abdef6f01a5d1588a307f2ddfe2333dc961 t/pod_syn.t
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.10 (GNU/Linux)
+Version: GnuPG v1.4.12 (GNU/Linux)
 
-iEYEARECAAYFAk9bsbUACgkQOV9mt2VyAVGVPQCeLxJ1AuU8/sMUK6L6eXCL7jTQ
-zRYAoKC9zcLSQBjRuhnWTQlLehJhyJe5
-=l/el
+iEYEARECAAYFAlHjFeEACgkQOV9mt2VyAVFOrwCeJhFofUO0vapl9lQx7nQAp1bj
++KoAn0/k39xISYqiO7jEgZNDTYrXCs2H
+=sCa1
 -----END PGP SIGNATURE-----

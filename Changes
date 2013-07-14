@@ -1,3 +1,10 @@
+version 0.008; 2013-07-14
+
+  * bugfix: require bugfixed version of DateTime::TimeZone::SystemV to
+    handle POSIX-TZ field showing transitions occurring at 24:00
+
+  * in META.{yml,json}, point to public git repository
+
 version 0.007; 2012-03-10
 
   * bugfix: recognise zone disuse indicator if it comes in the form of

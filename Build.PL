@@ -25,7 +25,7 @@ Module::Build->new(
 	requires => {
 		"Carp" => 0,
 		"Date::ISO8601" => 0,
-		"DateTime::TimeZone::SystemV" => "0.002",
+		"DateTime::TimeZone::SystemV" => "0.007",
 		"IO::File" => "1.13",
 		"IO::Handle" => "1.08",
 		"Params::Classify" => 0,
@@ -36,6 +36,12 @@ Module::Build->new(
 	},
 	dynamic_config => 0,
 	meta_add => { distribution_type => "module" },
+	meta_merge => {
+		resources => {
+			repository => "git://git.fysh.org/zefram/".
+				"DateTime-TimeZone-Tzfile.git",
+		},
+	},
 	create_makefile_pl => "passthrough",
 	sign => 1,
 )->create_build_script;

@@ -16,7 +16,7 @@ configure_requires:
   strict: 0
   warnings: 0
 dynamic_config: 0
-generated_by: 'Module::Build version 0.4, CPAN::Meta::Converter version 2.112621'
+generated_by: 'Module::Build version 0.4003, CPAN::Meta::Converter version 2.120921'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -25,11 +25,11 @@ name: DateTime-TimeZone-Tzfile
 provides:
   DateTime::TimeZone::Tzfile:
     file: lib/DateTime/TimeZone/Tzfile.pm
-    version: 0.007
+    version: 0.008
 requires:
   Carp: 0
   Date::ISO8601: 0
-  DateTime::TimeZone::SystemV: 0.002
+  DateTime::TimeZone::SystemV: 0.007
   IO::File: 1.13
   IO::Handle: 1.08
   Params::Classify: 0
@@ -39,4 +39,5 @@ requires:
   warnings: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.007
+  repository: git://git.fysh.org/zefram/DateTime-TimeZone-Tzfile.git
+version: 0.008
