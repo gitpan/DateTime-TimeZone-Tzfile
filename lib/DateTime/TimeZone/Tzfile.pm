@@ -47,7 +47,7 @@ use IO::File 1.13;
 use IO::Handle 1.08;
 use Params::Classify 0.000 qw(is_undef is_string is_ref);
 
-our $VERSION = "0.008";
+our $VERSION = "0.009";
 
 my $rdn_epoch_cjdn = 1721425;
 
@@ -220,6 +220,8 @@ sub new {
 	croak "bad tzfile: wrong magic number"
 		unless _saferead($fh, 4) eq "TZif";
 	my $fmtversion = _saferead($fh, 1);
+	croak "bad tzfile: malformed version number"
+		unless $fmtversion =~ /\A[2-9\0]\z/;
 	_saferead($fh, 15);
 	my($ttisgmtcnt, $ttisstdcnt, $leapcnt, $timecnt, $typecnt, $charcnt) =
 		map { _read_u32($fh) } 1 .. 6;
@@ -234,7 +236,7 @@ sub new {
 	for(my $i = $ttisstdcnt; $i--; ) { _saferead($fh, 1); }
 	for(my $i = $ttisgmtcnt; $i--; ) { _saferead($fh, 1); }
 	my $late_rule;
-	if($fmtversion eq "2") {
+	if($fmtversion ge "2") {
 		croak "bad tzfile: wrong magic number"
 			unless _saferead($fh, 4) eq "TZif";
 		_saferead($fh, 16);
@@ -315,9 +317,12 @@ sub new {
 			$obs_types[-1] = "zone disuse";
 		} else {
 			require DateTime::TimeZone::SystemV;
-			DateTime::TimeZone::SystemV->VERSION("0.007");
+			DateTime::TimeZone::SystemV->VERSION("0.008");
 			$obs_types[-1] =
-				DateTime::TimeZone::SystemV->new($late_rule);
+				DateTime::TimeZone::SystemV->new(
+					system => $fmtversion ge "3" ?
+							"tzfile3" : "posix",
+					recipe => $late_rule);
 		}
 	}
 	$self->{trn_times} = \@trn_times;

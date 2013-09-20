@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 
-use Test::More tests => 1693;
+use Test::More tests => 1753;
 
 {
 	package FakeUtcDateTime;
@@ -569,6 +569,29 @@ try "2010-01-01T12:00:00Z", 0, +18000, "DAVT";
 try "2010-03-10T19:59:59Z", 0, +18000, "DAVT";
 try "2010-03-10T20:00:00Z", 0, +25200, "DAVT";
 try "2011-01-01T12:00:00Z", 0, +25200, "DAVT";
+
+# This version of Hebron.tz has a non-POSIX TZ extension rule.
+$tz = DateTime::TimeZone::Tzfile->new("t/Hebron.tz");
+try "2035-03-29T21:59:59Z", 0,  +7200, "EET";
+try "2035-03-29T22:00:00Z", 1, +10800, "EEST";
+try "2035-09-20T21:59:59Z", 1, +10800, "EEST";
+try "2035-09-20T22:00:00Z", 0,  +7200, "EET";
+try "2036-03-27T21:59:59Z", 0,  +7200, "EET";
+try "2036-03-27T22:00:00Z", 1, +10800, "EEST";
+try "2036-09-25T21:59:59Z", 1, +10800, "EEST";
+try "2036-09-25T22:00:00Z", 0,  +7200, "EET";
+try "2037-03-26T21:59:59Z", 0,  +7200, "EET";
+try "2037-03-26T22:00:00Z", 1, +10800, "EEST";
+try "2037-09-24T21:59:59Z", 1, +10800, "EEST";
+try "2037-09-24T22:00:00Z", 0,  +7200, "EET";
+try "2038-03-25T21:59:59Z", 0,  +7200, "EET";
+try "2038-03-25T22:00:00Z", 1, +10800, "EEST";
+try "2038-09-23T21:59:59Z", 1, +10800, "EEST";
+try "2038-09-23T22:00:00Z", 0,  +7200, "EET";
+try "2039-03-31T21:59:59Z", 0,  +7200, "EET";
+try "2039-03-31T22:00:00Z", 1, +10800, "EEST";
+try "2039-09-22T21:59:59Z", 1, +10800, "EEST";
+try "2039-09-22T22:00:00Z", 0,  +7200, "EET";
 
 # This version of San_Luis.tz has no POSIX-TZ extension rule, because
 # the source data ends with an indefinite-future observance that is on

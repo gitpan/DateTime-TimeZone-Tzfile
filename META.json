@@ -4,7 +4,7 @@
       "Andrew Main (Zefram) <zefram@fysh.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Module::Build version 0.4003, CPAN::Meta::Converter version 2.120921",
+   "generated_by" : "Module::Build version 0.4007, CPAN::Meta::Converter version 2.131560",
    "license" : [
       "perl_5"
    ],
@@ -37,7 +37,7 @@
          "requires" : {
             "Carp" : "0",
             "Date::ISO8601" : "0",
-            "DateTime::TimeZone::SystemV" : "0.007",
+            "DateTime::TimeZone::SystemV" : "0.008",
             "IO::File" : "1.13",
             "IO::Handle" : "1.08",
             "Params::Classify" : "0",
@@ -51,7 +51,7 @@
    "provides" : {
       "DateTime::TimeZone::Tzfile" : {
          "file" : "lib/DateTime/TimeZone/Tzfile.pm",
-         "version" : "0.008"
+         "version" : "0.009"
       }
    },
    "release_status" : "stable",
@@ -63,5 +63,5 @@
          "url" : "git://git.fysh.org/zefram/DateTime-TimeZone-Tzfile.git"
       }
    },
-   "version" : "0.008"
+   "version" : "0.009"
 }

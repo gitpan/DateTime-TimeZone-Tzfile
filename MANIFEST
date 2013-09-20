@@ -8,6 +8,7 @@ Makefile.PL
 README
 lib/DateTime/TimeZone/Tzfile.pm
 t/Davis.tz
+t/Hebron.tz
 t/Kaliningrad.tz
 t/London.tz
 t/Loyston.tz

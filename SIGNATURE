@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.70.
+signed via the Module::Signature module, version 0.73.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -15,15 +15,16 @@ not run its Makefile.PL or Build.PL.
 Hash: SHA1
 
 SHA1 39b83fb4caa81801a2a6f26e1f96241c958dafac .gitignore
-SHA1 44b3807230424fb4c419318dc4e628fea696d770 Build.PL
-SHA1 0d6c9f45c8ea6aff2c19a3a6693c37da506e34d9 Changes
-SHA1 580c27eeabb5bfdd069eecf6d14377faa26a9271 MANIFEST
-SHA1 0b24f96d6c14d91987e7788928b830b4b34d7e02 META.json
-SHA1 a3a861774c94133614f9ee2bb4d087910374b0bf META.yml
-SHA1 d644f6f709bd3f1269c64f491a7a34a0b7fad19f Makefile.PL
+SHA1 f353a9e70c6d6a0242d3773a9dfe888305901d52 Build.PL
+SHA1 e29f5dee375038033306d9bd8f27384b686650c8 Changes
+SHA1 736e052ea5be9d51b8ef33bc3386e934f1a8fbb7 MANIFEST
+SHA1 9e3fa1999c3e574f7d478eece849bd62f00b4be9 META.json
+SHA1 96b81d85169bc9c6825e8ec63a9c0c75f9d4e95a META.yml
+SHA1 0bfa106a64fc680e40507c47cbf461cea3a8b374 Makefile.PL
 SHA1 f7bcb6666d4aec3bc580cacd1ee8d90bc7e0f8f5 README
-SHA1 5c57b9a0cd8c59324832b8dfa8716e2337b9341d lib/DateTime/TimeZone/Tzfile.pm
+SHA1 752c33a561addd3c983af9cea786ebe18387c0a1 lib/DateTime/TimeZone/Tzfile.pm
 SHA1 aee65210dec1a21938a8f9e26eae8e74a06849c3 t/Davis.tz
+SHA1 b5265afc509c8577dfa867469e83bea9cf8c549a t/Hebron.tz
 SHA1 d297f080067251860bb860aadb42540757ccb5c1 t/Kaliningrad.tz
 SHA1 e203aaf15eecc56c069b59f482f8ae3655c249a9 t/London.tz
 SHA1 ddf6da1833c704e86c8704551224abe0d2a16923 t/Loyston.tz
@@ -32,13 +33,13 @@ SHA1 ff4fdb3434f36b3f43dbd50d62bcc706aee3145b t/construct.t
 SHA1 56ea63a619f1f383e5b0dd70bced7e4af55a7560 t/crlf.t
 SHA1 b6c8696b5675418ce8ebe5056211bbcfd504d25c t/ident.t
 SHA1 1ac7443846004c2197546ee14ed4a7fc5e37a54c t/local.t
-SHA1 e724bb975edf23747bb6f907047ca2783e392633 t/offset.t
+SHA1 60d41ae3a72e33e0f99b580130d62173d31071a9 t/offset.t
 SHA1 904d9a4f76525e2303e4b0c168c68230f223c8de t/pod_cvg.t
 SHA1 65c75abdef6f01a5d1588a307f2ddfe2333dc961 t/pod_syn.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.12 (GNU/Linux)
 
-iEYEARECAAYFAlHjFeEACgkQOV9mt2VyAVFOrwCeJhFofUO0vapl9lQx7nQAp1bj
-+KoAn0/k39xISYqiO7jEgZNDTYrXCs2H
-=sCa1
+iEYEARECAAYFAlI8y9sACgkQOV9mt2VyAVEC2gCdFHZlqPELZDKx5RaENRCRj0yn
+GqAAnijqZAwFfW8H06iRA6R8YKRfSwZs
+=IHBS
 -----END PGP SIGNATURE-----
