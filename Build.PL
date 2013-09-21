@@ -25,7 +25,7 @@ Module::Build->new(
 	requires => {
 		"Carp" => 0,
 		"Date::ISO8601" => 0,
-		"DateTime::TimeZone::SystemV" => "0.008",
+		"DateTime::TimeZone::SystemV" => "0.009",
 		"IO::File" => "1.13",
 		"IO::Handle" => "1.08",
 		"Params::Classify" => 0,

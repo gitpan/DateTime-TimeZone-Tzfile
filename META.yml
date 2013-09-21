@@ -25,11 +25,11 @@ name: DateTime-TimeZone-Tzfile
 provides:
   DateTime::TimeZone::Tzfile:
     file: lib/DateTime/TimeZone/Tzfile.pm
-    version: 0.009
+    version: 0.010
 requires:
   Carp: 0
   Date::ISO8601: 0
-  DateTime::TimeZone::SystemV: 0.008
+  DateTime::TimeZone::SystemV: 0.009
   IO::File: 1.13
   IO::Handle: 1.08
   Params::Classify: 0
@@ -40,4 +40,4 @@ requires:
 resources:
   license: http://dev.perl.org/licenses/
   repository: git://git.fysh.org/zefram/DateTime-TimeZone-Tzfile.git
-version: 0.009
+version: 0.010

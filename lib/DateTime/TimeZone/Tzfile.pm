@@ -47,7 +47,7 @@ use IO::File 1.13;
 use IO::Handle 1.08;
 use Params::Classify 0.000 qw(is_undef is_string is_ref);
 
-our $VERSION = "0.009";
+our $VERSION = "0.010";
 
 my $rdn_epoch_cjdn = 1721425;
 
@@ -317,7 +317,7 @@ sub new {
 			$obs_types[-1] = "zone disuse";
 		} else {
 			require DateTime::TimeZone::SystemV;
-			DateTime::TimeZone::SystemV->VERSION("0.008");
+			DateTime::TimeZone::SystemV->VERSION("0.009");
 			$obs_types[-1] =
 				DateTime::TimeZone::SystemV->new(
 					system => $fmtversion ge "3" ?
